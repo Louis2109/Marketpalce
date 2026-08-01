@@ -1,0 +1,6 @@
+{
+  "name": "Mervason",
+  "description": "Plateforme de vitrine et boutiques en ligne pour commerçants au Cameroun",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

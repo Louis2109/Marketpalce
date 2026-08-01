@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile representation for merchants, clients, and administrators",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Full name or display name" },
+        "role": { "type": "string", "enum": ["client", "merchant", "admin"], "description": "User access role" },
+        "phoneNumber": { "type": "string", "description": "WhatsApp or mobile phone number" },
+        "city": { "type": "string", "enum": ["Yaoundé", "Douala", "Autre"], "description": "Primary operating city" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Account update timestamp" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Store": {
+      "title": "Store",
+      "description": "Merchant online storefront",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Store document ID" },
+        "ownerId": { "type": "string", "description": "UID of merchant owner" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 100, "description": "Store name" },
+        "slug": { "type": "string", "description": "URL-friendly store slug" },
+        "description": { "type": "string", "maxLength": 1000, "description": "Store bio/description" },
+        "logoUrl": { "type": "string", "description": "URL of store logo" },
+        "whatsappNumber": { "type": "string", "description": "Primary WhatsApp contact number" },
+        "city": { "type": "string", "description": "City location in Cameroon" },
+        "address": { "type": "string", "description": "Physical store address" },
+        "isVerified": { "type": "boolean", "description": "Verified status flag" },
+        "status": { "type": "string", "enum": ["active", "suspended"], "description": "Store operational status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Store creation date" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Store update date" }
+      },
+      "required": ["id", "ownerId", "name", "slug", "whatsappNumber", "city", "status", "createdAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Product catalog entry created by a merchant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Product document ID" },
+        "storeId": { "type": "string", "description": "ID of parent store" },
+        "ownerId": { "type": "string", "description": "UID of store owner" },
+        "name": { "type": "string", "minLength": 2, "maxLength": 150, "description": "Product title" },
+        "description": { "type": "string", "maxLength": 3000, "description": "Detailed description" },
+        "price": { "type": "number", "description": "Price in XAF" },
+        "currency": { "type": "string", "enum": ["XAF"], "description": "Currency code" },
+        "categoryId": { "type": "string", "description": "Category ID" },
+        "images": { "type": "array", "description": "Product image URLs" },
+        "isPublished": { "type": "boolean", "description": "Public visibility toggle" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["id", "storeId", "ownerId", "name", "price", "currency", "categoryId", "isPublished", "createdAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Platform product category managed by administrators",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Category document ID" },
+        "name": { "type": "string", "description": "Category label in French" },
+        "slug": { "type": "string", "description": "URL slug" },
+        "icon": { "type": "string", "description": "Lucide icon identifier" },
+        "order": { "type": "number", "description": "Display sort order" }
+      },
+      "required": ["id", "name", "slug"]
+    },
+    "Plan": {
+      "title": "Plan",
+      "description": "Merchant subscription plan definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Plan ID (free, standard, pro)" },
+        "name": { "type": "string", "description": "Plan display name" },
+        "priceMonthly": { "type": "number", "description": "Monthly fee in XAF" },
+        "maxStores": { "type": "number", "description": "Max allowed stores" },
+        "maxProductsPerStore": { "type": "number", "description": "Max products per store" },
+        "features": { "type": "array", "description": "Feature feature list" }
+      },
+      "required": ["id", "name", "priceMonthly", "maxStores", "maxProductsPerStore"]
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "description": "Active subscription status for a merchant",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Subscription ID" },
+        "merchantId": { "type": "string", "description": "UID of merchant" },
+        "planId": { "type": "string", "description": "Current plan ID" },
+        "status": { "type": "string", "enum": ["active", "cancelled", "expired"], "description": "Subscription state" },
+        "startDate": { "type": "string", "format": "date-time", "description": "Start timestamp" },
+        "endDate": { "type": "string", "format": "date-time", "description": "Expiration timestamp" }
+      },
+      "required": ["id", "merchantId", "planId", "status", "startDate"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Merchant subscription transaction log",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Payment record ID" },
+        "merchantId": { "type": "string", "description": "UID of merchant" },
+        "planId": { "type": "string", "description": "Plan purchased" },
+        "amount": { "type": "number", "description": "Amount in XAF" },
+        "provider": { "type": "string", "enum": ["mtn_momo", "orange_money", "card"], "description": "Payment channel" },
+        "status": { "type": "string", "enum": ["pending", "completed", "failed"], "description": "Payment result" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Transaction date" }
+      },
+      "required": ["id", "merchantId", "planId", "amount", "provider", "status", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "System notification for merchants or system alerts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Notification ID" },
+        "userId": { "type": "string", "description": "Target user UID" },
+        "title": { "type": "string", "description": "Notification title" },
+        "message": { "type": "string", "description": "Notification body" },
+        "isRead": { "type": "boolean", "description": "Read flag" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp" }
+      },
+      "required": ["id", "userId", "title", "message", "isRead", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection"
+    },
+    "/stores/{storeId}": {
+      "schema": "Store",
+      "description": "Public and merchant stores collection"
+    },
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Product catalog collection"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Product categories collection"
+    },
+    "/plans/{planId}": {
+      "schema": "Plan",
+      "description": "Subscription plans definition collection"
+    },
+    "/subscriptions/{subscriptionId}": {
+      "schema": "Subscription",
+      "description": "Merchant subscription records collection"
+    },
+    "/payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "Subscription payment audit log collection"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notification collection"
+    }
+  }
+}
