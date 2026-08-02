@@ -17,13 +17,13 @@ export const Card: React.FC<CardProps> = ({
 
   const variantStyles = {
     default:
-      'bg-white border border-slate-100 shadow-xs shadow-slate-200/50',
-    flat: 'bg-slate-50/80 border border-slate-100',
-    bordered: 'bg-white border border-slate-200/80',
+      'bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 shadow-xs shadow-slate-200/50 dark:shadow-none text-slate-900 dark:text-zinc-100',
+    flat: 'bg-slate-50/80 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800 text-slate-900 dark:text-zinc-100',
+    bordered: 'bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 text-slate-900 dark:text-zinc-100',
   };
 
   const hoverStyles = hoverEffect
-    ? 'hover:shadow-md hover:border-slate-200 hover:-translate-y-0.5'
+    ? 'hover:shadow-md hover:border-orange-500/30 dark:hover:border-orange-500/40 hover:-translate-y-0.5'
     : '';
 
   return (

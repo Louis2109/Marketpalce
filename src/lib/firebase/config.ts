@@ -7,12 +7,13 @@ import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
  * Uses VITE_ prefixed environment variables or falls back gracefully
  */
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyPlaceholderKeyForInitOnly',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'mervason-app.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'mervason-app',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'mervason-app.appspot.com',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '1234567890',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:1234567890:web:abcdef123456',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDajfWibqEmjTp0KWcgescmoBl8xVCJxRI',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'mervason-marketplace.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'mervason-marketplace',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'mervason-marketplace.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '1029517584393',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:1029517584393:web:e9bcd31eff7643244bf0d8',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-VEM2L625Q6',
 };
 
 // Initialize Firebase App instance

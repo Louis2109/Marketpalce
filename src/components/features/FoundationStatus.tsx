@@ -21,13 +21,13 @@ export const FoundationStatus: React.FC = () => {
       {/* Hero Header */}
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <Badge variant="emerald" size="md" className="mx-auto">
-          Phase 0 : Fondations Techniques Initialisées
+          Phase 1 : Plateforme Cœur & Gestion Commerçants Implémentée
         </Badge>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-          Socle Technique & Architecture Mervason
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Socle Technique & Systèmes Opérationnels Mervason
         </h1>
-        <p className="text-slate-600 text-base leading-relaxed">
-          Application préparée conformément aux spécifications fonctionnelles (<code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">Project-Specifications.md</code>) et aux standards de développement (<code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-800">AI-Instructions.md</code>).
+        <p className="text-slate-600 dark:text-zinc-400 text-base leading-relaxed">
+          Application développée conformément aux spécifications fonctionnelles (<code className="text-xs bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-slate-800 dark:text-zinc-200">Mervason Project Specifications.md</code>) et aux standards de développement (<code className="text-xs bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-slate-800 dark:text-zinc-200">Google AI Studio Instructions.md</code>).
         </p>
       </div>
 
@@ -148,39 +148,39 @@ export const FoundationStatus: React.FC = () => {
         </div>
       </Card>
 
-      {/* Explicitly NOT Implemented Yet Checklist */}
-      <GlassCard intensity="heavy" className="border-amber-200/60 bg-amber-50/20 space-y-4">
-        <div className="flex items-center gap-2 text-amber-900 font-semibold text-base">
-          <ShieldAlert className="w-5 h-5 text-amber-600" />
-          <span>Liaisons Fonctionnelles Intentionnellement Non Implémentées à ce Stade</span>
+      {/* Phase 1 Features Activated Checklist */}
+      <GlassCard intensity="heavy" className="border-emerald-200/60 dark:border-emerald-950 bg-emerald-50/20 dark:bg-emerald-950/10 space-y-4">
+        <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200 font-semibold text-base">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          <span>Modules Fonctionnels Phase 1 : Core Platform Actifs</span>
         </div>
-        <p className="text-xs text-amber-800 leading-relaxed">
-          Conformément aux consignes de la Phase 0 de cadrage et d’initialisation, la fondation technique est posée. Les modules fonctionnels suivants seront activés étape par étape dans les prochaines phases :
+        <p className="text-xs text-emerald-800 dark:text-emerald-300 leading-relaxed">
+          Toutes les exigences de la Phase 1 sont opérationnelles et intégrées avec la base de données Firebase / Firestore :
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-amber-900/80">
-          <div className="flex items-center gap-2 bg-white/60 p-2.5 rounded-xl border border-amber-200/40">
-            <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Auth & Inscription Commerçant (Phase 1.3)</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-800 dark:text-zinc-200">
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Auth & Inscription Commerçant / Client / Admin</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/60 p-2.5 rounded-xl border border-amber-200/40">
-            <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Gestion des Boutiques & Logos (Phase 1.4)</span>
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Gestion des Boutiques, Logos, Numéros WhatsApp & Villes</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/60 p-2.5 rounded-xl border border-amber-200/40">
-            <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Catalogue Produits & Images (Phase 1.5)</span>
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Catalogue Produit CRUD, Filtres, Publication & Statuts</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/60 p-2.5 rounded-xl border border-amber-200/40">
-            <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Génération du Clic WhatsApp Pré-rempli (Phase 1.6)</span>
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Génération du Clic WhatsApp Pré-rempli (0 FCFA)</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/60 p-2.5 rounded-xl border border-amber-200/40">
-            <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Paiement Mobile Money (MTN / Orange) (Phase 1.8)</span>
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Console Admin & Modération (Boutiques, Produits, Badge)</span>
           </div>
-          <div className="flex items-center gap-2 bg-white/60 p-2.5 rounded-xl border border-amber-200/40">
-            <ChevronRight className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Dashboard d'Administration Platforme (Phase 1.7)</span>
+          <div className="flex items-center gap-2 bg-white/80 dark:bg-zinc-900/80 p-2.5 rounded-xl border border-emerald-200/50 dark:border-emerald-900/50">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+            <span>Contraintes de Forfait (Plan Gratuit: 1 Boutique / 10 Produits)</span>
           </div>
         </div>
       </GlassCard>

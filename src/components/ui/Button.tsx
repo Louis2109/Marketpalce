@@ -1,20 +1,20 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'glass';
+  variant?: 'primary' | 'orange' | 'secondary' | 'outline' | 'ghost' | 'glass';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
+  variant = 'orange',
   size = 'md',
   className = '',
   children,
   ...props
 }) => {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap';
+    'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap cursor-pointer';
 
   const sizeStyles = {
     sm: 'px-3 py-1.5 text-xs gap-1.5',
@@ -23,16 +23,18 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantStyles = {
+    orange:
+      'bg-orange-500 text-white hover:bg-orange-600 shadow-sm shadow-orange-500/20 border border-orange-400/30',
     primary:
-      'bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20 border border-emerald-500/20',
+      'bg-orange-500 text-white hover:bg-orange-600 shadow-sm shadow-orange-500/20 border border-orange-400/30',
     secondary:
-      'bg-slate-900 text-slate-50 hover:bg-slate-800 shadow-sm border border-slate-800/40',
+      'bg-slate-900 dark:bg-zinc-800 text-slate-50 hover:bg-slate-800 dark:hover:bg-zinc-700 shadow-sm border border-slate-800/40 dark:border-zinc-700/60',
     outline:
-      'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs',
+      'border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white shadow-xs',
     ghost:
-      'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70',
+      'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/70 dark:hover:bg-zinc-800/60',
     glass:
-      'bg-white/80 backdrop-blur-md border border-white/60 text-slate-900 hover:bg-white shadow-sm',
+      'bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-white/60 dark:border-zinc-800/80 text-slate-900 dark:text-white hover:bg-white dark:hover:bg-zinc-900 shadow-sm',
   };
 
   return (
