@@ -10,7 +10,7 @@ import { PricingView } from './components/pricing/PricingView';
 import { PublicShopView } from './components/shop/PublicShopView';
 import { MerchantDashboard } from './components/dashboard/MerchantDashboard';
 import { AdminDashboard } from './components/admin/AdminDashboard';
-import { FoundationStatus } from './components/features/FoundationStatus';
+import { ContactView } from './components/contact/ContactView';
 import { AuthModal } from './components/auth/AuthModal';
 
 function AppContent() {
@@ -59,19 +59,15 @@ function AppContent() {
         openAuthModal={handleOpenAuth}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {currentView === 'home' && (
-          <div className="space-y-12">
-            <HomeMarketplace
-              onGoToMarketplace={handleGoToMarketplace}
-              onSelectShop={handleSelectShop}
-              onGoToPricing={() => setCurrentView('pricing')}
-              onGoToDashboard={() => setCurrentView('dashboard')}
-            />
-            <div className="pt-6 border-t border-slate-200/80 dark:border-zinc-800">
-              <FoundationStatus />
-            </div>
-          </div>
+          <HomeMarketplace
+            onGoToMarketplace={handleGoToMarketplace}
+            onSelectShop={handleSelectShop}
+            onGoToPricing={() => setCurrentView('pricing')}
+            onGoToDashboard={() => setCurrentView('dashboard')}
+            onOpenAuth={handleOpenAuth}
+          />
         )}
 
         {currentView === 'marketplace' && (
@@ -81,6 +77,8 @@ function AppContent() {
             onSelectShop={handleSelectShop}
           />
         )}
+
+        {currentView === 'contact' && <ContactView />}
 
         {currentView === 'categories' && (
           <CategoriesView onSelectCategory={handleSelectCategory} />
@@ -105,7 +103,12 @@ function AppContent() {
         {currentView === 'admin' && <AdminDashboard />}
       </main>
 
-      <Footer />
+      <Footer
+        onNavigate={(view) => {
+          setCurrentView(view);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       <AuthModal
         isOpen={isAuthModalOpen}

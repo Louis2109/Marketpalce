@@ -145,19 +145,15 @@ export const MarketplaceView: React.FC<MarketplaceViewProps> = ({
 
   return (
     <div className="space-y-8 py-4">
-      {/* Search Header Banner */}
+      {/* Search Header */}
       <div className="space-y-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold">
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Grand Catalogue Mervason</span>
-            </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Explorez les offres des commerçants locaux
+              Catalogue des produits
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400">
-              {filteredProducts.length} article(s) disponible(s) à Yaoundé et Douala.
+              {filteredProducts.length} article(s) répertorié(s) à Yaoundé et Douala.
             </p>
           </div>
 

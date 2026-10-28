@@ -2,67 +2,58 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search,
   Store as StoreIcon,
-  MessageSquare,
   MapPin,
-  ShieldCheck,
-  Sparkles,
   ArrowRight,
-  Package,
+  ShieldCheck,
   ShoppingBag,
-  Zap,
-  CheckCircle2,
-  ChevronRight,
-  Shirt,
-  Smartphone,
-  Home as HomeIcon,
-  Apple,
+  ExternalLink,
 } from 'lucide-react';
 import { ProductCard } from '../marketplace/ProductCard';
 import { ProductDetailModal } from '../marketplace/ProductDetailModal';
 import { WhatsAppOrderModal } from '../marketplace/WhatsAppOrderModal';
 import { Card } from '../ui/Card';
-import { GlassCard } from '../ui/GlassCard';
 import { Button } from '../ui/Button';
-import { Badge } from '../ui/Badge';
 import { Product, Store, Category } from '../../types';
 import { getAllProducts, getAllStores, getCategories } from '../../lib/firebase/services';
 import { updatePageMetadata } from '../../lib/seo';
+import { useAuth } from '../../context/AuthContext';
 
 interface HomeMarketplaceProps {
   onGoToMarketplace: (query?: string, categoryId?: string) => void;
   onSelectShop: (storeId: string) => void;
-  onGoToPricing: () => void;
+  onGoToPricing?: () => void;
   onGoToDashboard: () => void;
+  onOpenAuth?: (mode: 'login' | 'signup') => void;
 }
 
 export const HomeMarketplace: React.FC<HomeMarketplaceProps> = ({
   onGoToMarketplace,
   onSelectShop,
-  onGoToPricing,
   onGoToDashboard,
+  onOpenAuth,
 }) => {
+  const { userProfile } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [heroSearch, setHeroSearch] = useState('');
-  const [selectedCityFilter, setSelectedCityFilter] = useState<'Tous' | 'Yaoundé' | 'Douala'>('Tous');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cityFilter, setCityFilter] = useState<'Tous' | 'Yaoundé' | 'Douala'>('Tous');
 
   // Modal States
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-
   const [orderProduct, setOrderProduct] = useState<Product | null>(null);
   const [orderStore, setOrderStore] = useState<Store | null>(null);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   useEffect(() => {
     updatePageMetadata({
-      title: 'Mervason - Plateforme Vitrines & Boutiques en Ligne au Cameroun',
-      description: 'Découvrez des produits locaux à Yaoundé et Douala. Achetez directement sur WhatsApp auprès de commerçants certifiés.',
+      title: 'Mervason — Marketplace locale au Cameroun (Yaoundé & Douala)',
+      description: 'Découvrez les boutiques et produits de proximité à Yaoundé et Douala. Commandez directement auprès des commerçants sur WhatsApp.',
     });
 
-    async function loadHomeData() {
+    async function loadData() {
       setIsLoading(true);
       try {
         const [pData, sData, cData] = await Promise.all([
@@ -74,13 +65,13 @@ export const HomeMarketplace: React.FC<HomeMarketplaceProps> = ({
         setStores(sData.filter((s) => s.status === 'active'));
         setCategories(cData);
       } catch (err) {
-        console.error('Error loading home marketplace data:', err);
+        console.error('Erreur chargement données accueil:', err);
       } finally {
         setIsLoading(false);
       }
     }
 
-    loadHomeData();
+    loadData();
   }, []);
 
   const storeMap = useMemo(() => {
@@ -96,29 +87,47 @@ export const HomeMarketplace: React.FC<HomeMarketplaceProps> = ({
   }, [categories]);
 
   // Featured products filtered by city
-  const featuredProducts = useMemo(() => {
+  const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
         const store = storeMap.get(p.storeId);
-        if (selectedCityFilter !== 'Tous' && store) {
-          return store.city === selectedCityFilter;
+        if (cityFilter !== 'Tous' && store) {
+          return store.city === cityFilter;
         }
         return true;
       })
       .slice(0, 8);
-  }, [products, storeMap, selectedCityFilter]);
+  }, [products, storeMap, cityFilter]);
 
-  const featuredStores = useMemo(() => {
+  // Featured shops filtered by city
+  const filteredStores = useMemo(() => {
     return stores
-      .filter((s) => selectedCityFilter === 'Tous' || s.city === selectedCityFilter)
-      .slice(0, 3);
-  }, [stores, selectedCityFilter]);
+      .filter((s) => cityFilter === 'Tous' || s.city === cityFilter)
+      .slice(0, 4);
+  }, [stores, cityFilter]);
 
-  const handleHeroSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (heroSearch.trim()) {
-      onGoToMarketplace(heroSearch.trim());
+    if (searchQuery.trim()) {
+      onGoToMarketplace(searchQuery.trim());
+    } else {
+      onGoToMarketplace();
     }
+  };
+
+  const handleMerchantCTA = () => {
+    if (userProfile) {
+      onGoToDashboard();
+    } else if (onOpenAuth) {
+      onOpenAuth('signup');
+    } else {
+      onGoToDashboard();
+    }
+  };
+
+  const handleOpenDetail = (product: Product) => {
+    setSelectedProduct(product);
+    setIsDetailOpen(true);
   };
 
   const handleOpenOrder = (product: Product, store?: Store) => {
@@ -129,288 +138,311 @@ export const HomeMarketplace: React.FC<HomeMarketplaceProps> = ({
   };
 
   return (
-    <div className="space-y-12 py-4">
-      {/* Hero Banner with Search */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-orange-500 via-amber-600 to-orange-700 text-white p-6 sm:p-10 md:p-12 shadow-xl shadow-orange-500/10 space-y-6">
-        <div className="relative z-10 max-w-3xl space-y-4 sm:space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Marketplace & Vitrines du Cameroun</span>
+    <div className="space-y-16 py-4">
+      {/* SECTION 1: HERO */}
+      <section className="relative overflow-hidden rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 p-8 sm:p-12 md:p-16 transition-colors">
+        <div className="max-w-3xl space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-xs font-semibold text-slate-700 dark:text-zinc-300">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+            <span>Marketplace Cameroun • Yaoundé & Douala</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-            Trouvez les meilleurs produits vendus à Yaoundé et Douala.
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
+            Découvrez les boutiques et produits près de chez vous.
           </h1>
 
-          <p className="text-xs sm:text-base text-orange-100 leading-relaxed font-medium max-w-2xl">
-            Découvrez les offres des commerçants locaux, consultez leurs boutiques virtuelles et achetez directement sur WhatsApp en toute simplicité.
+          <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-400 max-w-2xl leading-relaxed">
+            Explorez les boutiques de Yaoundé et Douala, découvrez leurs produits et contactez directement les commerçants sur WhatsApp.
           </p>
 
-          {/* Search bar inside hero */}
-          <form onSubmit={handleHeroSearchSubmit} className="pt-2 max-w-2xl">
-            <div className="p-2 rounded-2xl bg-white dark:bg-zinc-900 shadow-xl flex flex-col sm:flex-row items-center gap-2 border border-orange-200/40">
-              <div className="relative flex-1 w-full flex items-center">
-                <Search className="w-5 h-5 text-slate-400 absolute left-3.5 pointer-events-none" />
-                <input
-                  type="text"
-                  value={heroSearch}
-                  onChange={(e) => setHeroSearch(e.target.value)}
-                  placeholder="Ex: Robe en pagne, iPhone, Chaussures, Sac en cuir..."
-                  className="w-full pl-11 pr-4 py-3 rounded-xl text-xs sm:text-sm text-slate-900 dark:text-white bg-transparent focus:outline-none"
-                />
-              </div>
-
-              <Button
+          {/* Search bar */}
+          <form onSubmit={handleSearchSubmit} className="pt-2 max-w-xl">
+            <div className="relative flex items-center">
+              <Search className="absolute left-4 w-4 h-4 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Rechercher un produit, une marque, une boutique..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-28 py-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+              />
+              <button
                 type="submit"
-                variant="orange"
-                size="md"
-                className="w-full sm:w-auto font-bold shadow-md shrink-0 py-3"
+                className="absolute right-2 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-colors cursor-pointer"
               >
-                <span>Rechercher</span>
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
+                Rechercher
+              </button>
             </div>
           </form>
-        </div>
 
-        {/* Decorative background glow */}
-        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-      </div>
-
-      {/* Value Pillars */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card variant="bordered" className="p-6 space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center font-bold">
-            <ShoppingBag className="w-5 h-5" />
-          </div>
-          <h3 className="font-bold text-slate-900 dark:text-white text-base">
-            Produits Locaux en FCFA
-          </h3>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-            Trouvez les articles disponibles en stock à Yaoundé et Douala au prix direct fixé par le commerçant.
-          </p>
-        </Card>
-
-        <Card variant="bordered" className="p-6 space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-            <MessageSquare className="w-5 h-5" />
-          </div>
-          <h3 className="font-bold text-slate-900 dark:text-white text-base">
-            Commande WhatsApp Directe
-          </h3>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-            Achetez sans création de compte acheteur. Cliquez, générez votre message pré-rempli et discutez directement avec le vendeur.
-          </p>
-        </Card>
-
-        <Card variant="bordered" className="p-6 space-y-3">
-          <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <h3 className="font-bold text-slate-900 dark:text-white text-base">
-            Boutiques Certifiées
-          </h3>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
-            Consultez les vitrines en ligne des commerçants vérifiés, leurs coordonnées précises et leur catalogue complet.
-          </p>
-        </Card>
-      </div>
-
-      {/* Top Categories */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              Catégories Principales
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Explorez nos catégories phares pour affiner votre recherche.
-            </p>
-          </div>
-
-          <button
-            onClick={() => onGoToMarketplace()}
-            className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:underline flex items-center gap-1"
-          >
-            <span>Tout le catalogue</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {categories.slice(0, 6).map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => onGoToMarketplace(undefined, cat.id)}
-              className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 hover:border-orange-500/50 hover:shadow-md transition-all text-left space-y-2 group cursor-pointer"
+          {/* Action CTAs */}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <Button
+              variant="orange"
+              size="md"
+              onClick={() => onGoToMarketplace()}
+              className="font-semibold text-xs sm:text-sm px-5 py-2.5"
             >
-              <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <ShoppingBag className="w-4 h-4" />
-              </div>
-              <div className="font-bold text-slate-900 dark:text-white text-xs truncate group-hover:text-orange-600 dark:group-hover:text-orange-400">
-                {cat.name}
-              </div>
-            </button>
-          ))}
+              <ShoppingBag className="w-4 h-4 mr-2" />
+              Explorer le catalogue
+            </Button>
+            <Button
+              variant="outline"
+              size="md"
+              onClick={handleMerchantCTA}
+              className="font-medium text-xs sm:text-sm px-5 py-2.5"
+            >
+              <StoreIcon className="w-4 h-4 mr-2 text-orange-500" />
+              Créer ma boutique
+            </Button>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Featured Products Section */}
-      <div className="space-y-6">
+      {/* SECTION 2: PRODUCT DISCOVERY */}
+      <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                Derniers articles mis en rayon
-              </h2>
-              <Badge variant="orange" size="sm">Récents</Badge>
-            </div>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Achetez en direct auprès des commerçants de Yaoundé et Douala.
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Sélection de produits
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+              Produits disponibles immédiatement auprès de commerçants locaux
             </p>
           </div>
 
-          {/* City filter tabs */}
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl">
-            {(['Tous', 'Yaoundé', 'Douala'] as const).map((city) => (
-              <button
-                key={city}
-                onClick={() => setSelectedCityFilter(city)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedCityFilter === city
-                    ? 'bg-orange-500 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                {city}
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            {/* City Filter Pills */}
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-900 p-1 rounded-xl border border-slate-200/80 dark:border-zinc-800">
+              {(['Tous', 'Yaoundé', 'Douala'] as const).map((city) => (
+                <button
+                  key={city}
+                  onClick={() => setCityFilter(city)}
+                  className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    cityFilter === city
+                      ? 'bg-white dark:bg-zinc-800 text-orange-600 dark:text-orange-400 shadow-xs'
+                      : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onGoToMarketplace()}
+              className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700"
+            >
+              <span>Voir tout</span>
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
+            </Button>
           </div>
         </div>
 
-        {/* Product Cards Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-72 rounded-2xl bg-slate-200/60 dark:bg-zinc-800/60 animate-pulse" />
+              <div
+                key={i}
+                className="h-72 rounded-2xl bg-slate-100 dark:bg-zinc-900 animate-pulse border border-slate-200/60 dark:border-zinc-800"
+              />
             ))}
           </div>
-        ) : featuredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-12 px-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-200/70 dark:border-zinc-800">
+            <ShoppingBag className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-slate-700 dark:text-zinc-300">
+              Aucun produit disponible pour cette sélection
+            </p>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+              Explorez l'ensemble du catalogue ou revenez un peu plus tard.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setCityFilter('Tous');
+                onGoToMarketplace();
+              }}
+              className="mt-4 text-xs"
+            >
+              Voir tous les produits
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 store={storeMap.get(product.storeId)}
                 category={categoryMap.get(product.categoryId)}
-                onSelectProduct={(p) => {
-                  setSelectedProduct(p);
-                  setIsDetailOpen(true);
-                }}
+                onSelectProduct={handleOpenDetail}
                 onSelectShop={onSelectShop}
                 onOpenWhatsAppOrder={handleOpenOrder}
               />
             ))}
           </div>
-        ) : (
-          <div className="p-8 text-center rounded-2xl bg-slate-50 dark:bg-zinc-900 text-slate-500 text-xs">
-            Aucun produit disponible pour cette ville actuellement.
-          </div>
         )}
+      </section>
 
-        <div className="text-center pt-2">
-          <Button variant="outline" size="md" onClick={() => onGoToMarketplace()} className="font-bold">
-            <span>Voir tous les articles ({products.length})</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Featured Stores Section */}
-      <div className="space-y-6">
+      {/* SECTION 3: CATEGORIES */}
+      <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-              Boutiques Recommandées
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Catégories de produits
             </h2>
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Vitrines en ligne créées par des commerçants certifiés.
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+              Parcourez le catalogue selon vos besoins
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onGoToMarketplace()}
+            className="text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white"
+          >
+            <span>Toutes les catégories</span>
+            <ArrowRight className="w-3.5 h-3.5 ml-1" />
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {categories.slice(0, 6).map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => onGoToMarketplace(undefined, cat.id)}
+              className="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 hover:border-orange-500/50 dark:hover:border-orange-500/50 hover:bg-orange-50/20 dark:hover:bg-orange-950/20 text-left transition-all group cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <ShoppingBag className="w-4 h-4" />
+              </div>
+              <h3 className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                {cat.name}
+              </h3>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5 truncate">
+                {cat.description || 'Découvrir'}
+              </p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 4: FEATURED SHOPS */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Boutiques locales
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+              Des commerçants vérifiés prêts à vous servir à Yaoundé et Douala
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuredStores.map((s) => (
-            <GlassCard key={s.id} hoverEffect className="p-6 space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    {s.logoUrl ? (
-                      <img
-                        src={s.logoUrl}
-                        alt={s.name}
-                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 dark:border-zinc-700"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 rounded-xl bg-orange-500 text-white font-bold flex items-center justify-center text-lg">
-                        {s.name.charAt(0)}
-                      </div>
-                    )}
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm">{s.name}</h3>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-zinc-400">
-                        <MapPin className="w-3 h-3 text-orange-500" />
-                        <span>{s.city}</span>
-                      </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-44 rounded-2xl bg-slate-100 dark:bg-zinc-900 animate-pulse border border-slate-200/60 dark:border-zinc-800"
+              />
+            ))}
+          </div>
+        ) : filteredStores.length === 0 ? (
+          <div className="text-center py-10 px-4 rounded-2xl bg-slate-50 dark:bg-zinc-900/50 border border-slate-200/70 dark:border-zinc-800">
+            <StoreIcon className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-xs text-slate-500 dark:text-zinc-400">
+              Aucune boutique répertoriée dans cette zone pour le moment.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredStores.map((store) => (
+              <div
+                key={store.id}
+                onClick={() => onSelectShop(store.id)}
+                className="group p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 hover:border-orange-500/50 dark:hover:border-orange-500/50 transition-all flex flex-col justify-between cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-zinc-800 border border-orange-200/50 dark:border-zinc-700 flex items-center justify-center font-bold text-orange-600 dark:text-orange-400 text-sm overflow-hidden shrink-0">
+                      {store.logoUrl ? (
+                        <img
+                          src={store.logoUrl}
+                          alt={store.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        store.name.substring(0, 2).toUpperCase()
+                      )}
                     </div>
+                    {store.isVerified && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                        <ShieldCheck className="w-3 h-3" />
+                        Vérifiée
+                      </span>
+                    )}
                   </div>
-                  {s.isVerified && <Badge variant="emerald" size="sm">Vérifiée</Badge>}
+
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors truncate">
+                      {store.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                      <span>{store.city}</span>
+                    </p>
+                    <p className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-2 mt-2 leading-relaxed">
+                      {store.description || 'Boutique en ligne sur Mervason.'}
+                    </p>
+                  </div>
                 </div>
 
-                <p className="text-xs text-slate-600 dark:text-zinc-300 line-clamp-2">
-                  {s.description || 'Boutique en ligne officielle sur Mervason.'}
-                </p>
+                <div className="pt-4 border-t border-slate-100 dark:border-zinc-800 mt-4 flex items-center justify-between text-xs font-semibold text-orange-600 dark:text-orange-400">
+                  <span>Visiter la boutique</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </div>
               </div>
+            ))}
+          </div>
+        )}
+      </section>
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onSelectShop(s.id)}
-                className="w-full text-xs font-bold"
-              >
-                <span>Visiter la vitrine</span>
-                <ChevronRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </GlassCard>
-          ))}
-        </div>
-      </div>
+      {/* SECTION 5: MERCHANT CTA */}
+      <section className="rounded-3xl bg-slate-900 text-white dark:bg-zinc-900 dark:border dark:border-zinc-800 p-8 sm:p-12 md:p-14 relative overflow-hidden">
+        <div className="max-w-2xl space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-semibold text-orange-400">
+            <StoreIcon className="w-3.5 h-3.5" />
+            <span>Espace Commerçants</span>
+          </div>
 
-      {/* Merchant CTA Banner */}
-      <div className="p-8 sm:p-10 rounded-3xl bg-slate-900 text-white space-y-6 relative overflow-hidden">
-        <div className="relative z-10 max-w-2xl space-y-4">
-          <Badge variant="orange" size="sm">
-            Espace Commerçant
-          </Badge>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Vous êtes commerçant à Yaoundé ou Douala ?
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            Donnez plus de visibilité à votre boutique.
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Ouvrez votre boutique en ligne Mervason en 2 minutes. Publiez vos produits, définissez vos prix en FCFA et recevez vos clients directement sur WhatsApp.
+
+          <p className="text-sm sm:text-base text-slate-300 dark:text-zinc-400 leading-relaxed">
+            Créez votre boutique en ligne, présentez vos produits et recevez directement les demandes de vos clients sur WhatsApp.
           </p>
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Button variant="orange" size="md" onClick={onGoToDashboard} className="font-bold shadow-md">
-              <StoreIcon className="w-4 h-4 mr-1" />
-              <span>Créer ma boutique gratuite</span>
-            </Button>
-            <Button variant="ghost" size="md" onClick={onGoToPricing} className="text-white hover:bg-white/10 text-xs">
-              <span>Voir les forfaits & limites</span>
+
+          <div className="pt-2">
+            <Button
+              variant="orange"
+              size="md"
+              onClick={handleMerchantCTA}
+              className="font-bold text-xs sm:text-sm px-6 py-3 cursor-pointer"
+            >
+              Créer ma boutique
             </Button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Product Detail Modal */}
+      {/* Modals for Product Detail and WhatsApp ordering */}
       <ProductDetailModal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
@@ -420,13 +452,10 @@ export const HomeMarketplace: React.FC<HomeMarketplaceProps> = ({
         onSelectShop={onSelectShop}
         onOpenWhatsAppOrder={(p, s) => {
           setIsDetailOpen(false);
-          setOrderProduct(p);
-          setOrderStore(s);
-          setIsOrderModalOpen(true);
+          handleOpenOrder(p, s);
         }}
       />
 
-      {/* WhatsApp Order Modal */}
       <WhatsAppOrderModal
         isOpen={isOrderModalOpen}
         onClose={() => setIsOrderModalOpen(false)}
